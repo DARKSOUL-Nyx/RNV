@@ -1,0 +1,9 @@
+model:
+  type: siamese
+  backbone: resnet18
+  transformer: vit_small_patch16_224
+  metric_head: cosine
+
+dataset:
+  task: change_detection
+  pairs: true

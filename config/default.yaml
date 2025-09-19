@@ -1,0 +1,22 @@
+model:
+  cnn: resnet50
+  trasnformer: vit_base_path16_224
+  fusion: concat
+  hidden_dim: 512
+
+training:
+  batch_size: 32
+  epochs: 50 
+  lr: 1e-4
+  optimizer: adamw
+
+dataset:
+  name: xview2
+  path: ./data/
+  task: classification
+
+
+logging:
+  mlflow_tracking_uri: "file:./mlruns"
+  experiment_name: "cnn_transformer_satellite"
+  save_dir: ./outputs
