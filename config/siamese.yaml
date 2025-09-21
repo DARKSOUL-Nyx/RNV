@@ -2,7 +2,7 @@ model:
   type: siamese
   backbone: resnet34
   transformer: vit_small_patch16_224
-  fusion: add
+  fusion: attention
   metric_head: cosine
   pretrained: true
 

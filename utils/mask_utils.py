@@ -9,7 +9,7 @@ DAMAGE_TO_INT_MAP = {
     "minor-damage": 2,
     "major-damage": 3,
     "destroyed": 4,
-    "un-classified": 1 # Treat un-classified as no-damage for simplicity
+    "no-damage Building": 1 # Treat un-classified as no-damage for simplicity
 }
 
 def generate_mask_from_json(json_path, height=1024, width=1024):
