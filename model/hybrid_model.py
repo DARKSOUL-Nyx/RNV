@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 from .cnn_backbone import CNNBackbone
 from .transformer_head import TransformerHead
-from .fusion_blocks import ConcatFusion, AdditiveFusion, AttentionFusion
+from .fusion_blocks import ConcatFusion, AdditiveFusion, AttentionFusion, Patchify
 
 class HybridModel(nn.Module):
     def __init__(self, config):
@@ -11,6 +11,9 @@ class HybridModel(nn.Module):
         # CNN Backbone
         self.cnn = CNNBackbone(config["cnn"])
         cnn_out_dim = self.cnn.out_dim
+
+        # Patchify
+        self.patchify = Patchify(patch_size=config.get("patch_size", 16))
 
         # Transformer Backbone
         self.transformer = TransformerHead(config["transformer"])
@@ -35,13 +38,17 @@ class HybridModel(nn.Module):
 
     def forward(self, x):
         x_cnn = self.cnn(x)
-        x_trans = self.transformer(x)
+        x_patched = self.patchify(x_cnn)
+        x_trans = self.transformer(x_patched)
 
         if isinstance(self.fusion, AttentionFusion):
-            x_cnn = x_cnn.unsqueeze(1)   # (B,1,dim)
+            x_cnn_pooled = F.adaptive_avg_pool2d(x_cnn, (1, 1)).flatten(1).unsqueeze(1)
             x_trans = x_trans.unsqueeze(1)
-            fused = self.fusion(x_cnn, x_trans).squeeze(1)
+            fused = self.fusion(x_cnn_pooled, x_trans).squeeze(1)
         else:
-            fused = self.fusion(x_cnn, x_trans)
+            x_cnn_pooled = F.adaptive_avg_pool2d(x_cnn, (1, 1)).flatten(1)
+            fused = self.fusion(x_cnn_pooled, x_trans)
+
 
         return self.classifier(fused)
+    
