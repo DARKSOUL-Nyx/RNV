@@ -1,9 +1,38 @@
 model:
   type: siamese
-  backbone: resnet18
+  backbone: resnet34
   transformer: vit_small_patch16_224
+  fusion: add
   metric_head: cosine
+  pretrained: true
+
+
+training:
+  batch_size: 16 # Smaller batch size for larger images
+  epochs: 575
+  lr: 1e-5
+  optimizer: adamw
+  weight_decay: 1e-4
+
+  # Loss function specific
+  loss_margin: 2.0 # Margin for ContrastiveLoss
+
+  # Learning rate scheduler
+  scheduler:
+    name: step_lr
+    step_size: 20
+    gamma: 0.1
+
+  # Evaluation
+  eval_threshold: 0.5 # Threshold for turning similarity scores into predictions
+
 
 dataset:
   task: change_detection
-  pairs: true
+  images_dir: "./data/xview2/images"  # Path to your images
+  labels_dir: "./data/xview2/labels"  # Path to your labels
+
+logging:
+  mlflow_tracking_uri: "file:./mlruns"
+  experiment_name: "siamese_xview2"
+  save_dir: ./outputs
